@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <title>Get Location Data</title>
+
+    <style>
+    .output{
+        margin-left: 10px;
+        font-size: 16px;
+    }
+    .flex-container {
+        display: flex;
+        justify-content: center;
+    }
+    .flex-container > button {
+        width:160px;
+        height:40px;
+        margin: 0px 15px 0px 15px;
+        font-size: 17px;
+    }
+    </style>
+
+</head>
+
+<body>
+    <p class='output'>Click the button to get your coordinates.</p>
+    <div class="flex-container">
+        <button class="center waves-effect waves-light btn blue" onclick="spot()">Get Location</button>
+    </div>
+
+    <p id="demo"></p>
+
+    <div class="output">
+        <div id="lat"></div>
+        <div id="lng"></div>
+        <div id="acc"></div>
+        <div id="alt"></div>
+        <div id="altAcc"></div>
+        <div id="heading"></div>
+        <div id="speed"></div>
+        <div id="timestamp"></div>
+    </div>
+
+<script>
+
+var options = {
+  enableHighAccuracy: true,
+  timeout: 1000,
+  maximumAge: 0
+};
+
+function getLocationPromise () {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+}
+
+function error(err) {
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
+async function spot (){
+    console.time('time to get location');
+
+    const position = await getLocationPromise();
+    console.log('position:',position);
+
+    document.getElementById("lat").innerHTML = 'Lat: ' + position.coords.latitude;
+    document.getElementById("lng").innerHTML = 'Lng: ' + position.coords.longitude;
+    document.getElementById("acc").innerHTML = 'Accuracy of position: ' + position.coords.accuracy;
+    document.getElementById("alt").innerHTML = 'Altitude: ' + position.coords.altitude;
+    document.getElementById("altAcc").innerHTML = 'Altitude Accuracy: ' + position.coords.altitudeAccuracy;
+    document.getElementById("heading").innerHTML = 'Heading: ' + position.coords.heading;
+    document.getElementById("speed").innerHTML = 'Speed: ' + position.coords.speed;
+    document.getElementById("timestamp").innerHTML = 'Timestamp: ' + position.timestamp;
+
+    console.timeEnd('time to get location');
+}
+
+</script>
+</body>
+</html>
+

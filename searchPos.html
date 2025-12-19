@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Location Data</title>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <style>
+    .output {
+      margin-left: 10px;
+      font-size: 16px;
+    }
+    .flex-container {
+      display: flex;
+      justify-content: center;
+    }
+    .flex-container > button {
+      width: 200px;
+      height: 40px;
+      margin: 0 15px;
+      font-size: 17px;
+    }
+  </style>
+</head>
+
+<body>
+
+<p class="output">ボタンを押すと位置情報を取得し、継続更新します。</p>
+
+<div class="flex-container">
+  <button class="waves-effect waves-light btn blue" onclick="startTracking()">
+    Start Tracking
+  </button>
+  <button class="waves-effect waves-light btn red" onclick="stopTracking()">
+    Stop
+  </button>
+</div>
+
+<div class="output">
+  <div id="status">状態：未取得</div>
+  <div id="lat"></div>
+  <div id="lng"></div>
+  <div id="acc"></div>
+  <div id="timestamp"></div>
+</div>
+
+<script>
+let watchId = null;
+
+const options = {
+  enableHighAccuracy: true, // スマホ・PC両対応
+  timeout: 60000,           // 初回対策
+  maximumAge: 0
+};
+
+// 表示更新
+function updateDisplay(pos, state) {
+  const c = pos.coords;
+  document.getElementById("status").textContent = state;
+  document.getElementById("lat").textContent = "Lat: " + c.latitude;
+  document.getElementById("lng").textContent = "Lng: " + c.longitude;
+  document.getElementById("acc").textContent = "Accuracy: " + c.accuracy + " m";
+  document.getElementById("timestamp").textContent =
+    "Timestamp: " + new Date(pos.timestamp).toLocaleString();
+}
+
+// エラー処理
+function geoError(err) {
+  document.getElementById("status").textContent =
+    `ERROR(${err.code}): ${err.message}`;
+}
+
+// 開始（ボタン）
+function startTracking() {
+  if (watchId !== null) return;
+
+  document.getElementById("status").textContent = "状態：初回取得中...";
+
+  // ① まず1回取得
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      updateDisplay(pos, "状態：初回取得成功");
+
+      // ② 取得後に継続監視
+      watchId = navigator.geolocation.watchPosition(
+        p => updateDisplay(p, "状態：更新中"),
+        geoError,
+        options
+      );
+    },
+    geoError,
+    options
+  );
+}
+
+// 停止（ボタン）
+function stopTracking() {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+    document.getElementById("status").textContent = "状態：停止しました";
+  }
+}
+</script>
+
+</body>
+</html>
